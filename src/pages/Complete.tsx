@@ -1,13 +1,10 @@
-import React, {useState} from 'react';
-import {Pressable, Text, View} from 'react-native';
+import React from 'react';
+import {Text, View} from 'react-native';
 
 function Complete() {
-  const [count, setCount] = useState(1);
   return (
     <View>
-      <Pressable onPress={() => setCount(p => p + 1)}>
-        <Text>{count}</Text>
-      </Pressable>
+      <Text>완료 화면</Text>
     </View>
   );
 }

@@ -4,7 +4,7 @@ import {Text, View} from 'react-native';
 function Ing() {
   return (
     <View>
-      <Text>Complete</Text>
+      <Text>주문 지도</Text>
     </View>
   );
 }

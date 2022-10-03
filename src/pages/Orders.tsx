@@ -4,7 +4,7 @@ import {Text, View} from 'react-native';
 function Orders() {
   return (
     <View>
-      <Text>Complete</Text>
+      <Text>주문 목록</Text>
     </View>
   );
 }

@@ -1,5 +1,6 @@
 import React, {useCallback, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Platform,
   Pressable,
@@ -7,7 +8,6 @@ import {
   Text,
   TextInput,
   View,
-  ActivityIndicator,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import DismissKeyboardView from '../components/DismissKeyboardView';
@@ -73,7 +73,7 @@ function SignUp({navigation}: SignUpScreenProps) {
       Alert.alert('알림', '회원가입 되었습니다.');
       navigation.navigate('SignIn');
     } catch (error) {
-      const errorResponse = (error as AxiosError<{message: string}>).response;
+      const errorResponse = (error as AxiosError).response;
       console.error(errorResponse);
       if (errorResponse) {
         Alert.alert('알림', errorResponse.data.message);
