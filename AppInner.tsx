@@ -16,6 +16,7 @@ import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
 import userSlice from './src/slices/user';
 import {Alert} from 'react-native';
+import orderSlice from './src/slices/order';
 
 export type LoggedInParamList = {
   Orders: undefined;
@@ -36,6 +37,40 @@ function AppInner() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
   console.log('isLoggedIn', isLoggedIn);
+
+  // axios intercept
+  useEffect(() => {
+    axios.interceptors.response.use(
+      response => response,
+      async error => {
+        const {
+          config,
+          response: {status},
+        } = error;
+
+        if (status === 419) {
+          if (error.response.data.code === 'expired') {
+            const originalRequest = config;
+            const refreshToken = await EncryptedStorage.getItem('refreshToken');
+            const {data} = await axios.post(
+              `${Config.API_URL}/refreshToken`,
+              {},
+              {
+                headers: {
+                  authorization: `Bearer ${refreshToken}`,
+                },
+              },
+            );
+            // 새로운 토큰 저장
+            dispatch(userSlice.actions.setAccessToken(data.data.accessToken));
+            originalRequest.headers.authorization = `Bearer ${data.data.accessToken}`;
+            return axios(originalRequest);
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
+  }, []);
 
   // 앱 실행 시 토큰 있으면 로그인하는 코드
   useEffect(() => {
@@ -67,7 +102,7 @@ function AppInner() {
           Alert.alert('알림', '다시 로그인 해주세요.');
         }
       } finally {
-        // TODO 스플래시 스크린 없애기
+        // TODO: 스플래시 스크린 없애기
       }
     };
     getTokenAndRefresh();
@@ -78,6 +113,7 @@ function AppInner() {
   useEffect(() => {
     const callback = (data: any) => {
       console.log('data', data);
+      dispatch(orderSlice.actions.addOrder(data));
     };
     if (socket && isLoggedIn) {
       socket.emit('acceptOrder', 'hello');
@@ -88,7 +124,7 @@ function AppInner() {
         socket.off('order', callback);
       }
     };
-  }, [isLoggedIn, socket]);
+  }, [dispatch, isLoggedIn, socket]);
 
   useEffect(() => {
     if (!isLoggedIn) {
